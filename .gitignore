@@ -1,0 +1,30 @@
+# Python virtual environments
+backend/be_venv/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Editor & OS-specific files
+*.DS_Store
+.vscode/
+.idea/
+
+# Python build artifacts
+*.egg-info/
+dist/
+build/
+
+# Flutter & Dart build files (if using Flutter frontend)
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+build/
+.pub-cache/
+packages/
+
+# test related stuff
+data/*
