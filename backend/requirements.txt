@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+insightface
+onnxruntime
+scikit-learn
+opencv-python-headless
+numpy
+tqdm
+playwright
+ahnlich-client-py
+python-multipart

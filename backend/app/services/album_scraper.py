@@ -119,7 +119,7 @@ async def download_images(page, photo_data, album_name, page_num, start_idx=0):
     for idx, data in enumerate(photo_data):
         try:
             if not data['src']:
-                print(f"⚠ No image source found for item {start_idx + idx + 1}")
+                print(f"No image source found for item {start_idx + idx + 1}")
                 continue
 
             img_url = data['src']
@@ -153,23 +153,24 @@ async def download_images(page, photo_data, album_name, page_num, start_idx=0):
 
             # Check if file already exists
             if os.path.exists(filename):
-                print(f"⏭ Skipping existing file: {os.path.basename(filename)}")
+                print(f"Skipping existing file: {os.path.basename(filename)}")
                 downloaded += 1  # Count as downloaded to maintain progress
                 continue
 
             # Download the image directly
+            print(img_url)
             response = await page.goto(img_url)
             if response and response.status == 200:
                 content = await response.body()
                 with open(filename, 'wb') as f:
                     f.write(content)
-                print(f"✔ Downloaded: {os.path.basename(filename)}")
+                print(f"Downloaded: {os.path.basename(filename)}")
                 downloaded += 1
             else:
-                print(f"⚠ Failed to download {img_url}: HTTP {response.status if response else 'No response'}")
+                print(f"Failed to download {img_url}: HTTP {response.status if response else 'No response'}")
 
         except Exception as e:
-            print(f"⚠ Error downloading image {start_idx + idx + 1}: {e}")
+            print(f"Error downloading image {start_idx + idx + 1}: {e}")
             
             # Fallback: try to visit individual photo page
             if data.get('href'):
@@ -187,10 +188,10 @@ async def download_images(page, photo_data, album_name, page_num, start_idx=0):
                         content = await response.body()
                         with open(filename, 'wb') as f:
                             f.write(content)
-                        print(f"✔ Downloaded via fallback: {os.path.basename(filename)}")
+                        print(f"Downloaded via fallback: {os.path.basename(filename)}")
                         downloaded += 1
                 except Exception as fallback_error:
-                    print(f"⚠ Fallback also failed for image {start_idx + idx + 1}: {fallback_error}")
+                    print(f"Fallback also failed for image {start_idx + idx + 1}: {fallback_error}")
     
     return downloaded
 
@@ -249,17 +250,16 @@ async def scrape_album(album_url: str, album_name="default_album", max_pages=Non
                         await asyncio.sleep(2)
                         
                 except Exception as e:
-                    print(f"⚠ Error processing page {page_num}: {e}")
+                    print(f"Error processing page {page_num}: {e}")
                     continue
             
             print(f"\n[INFO] Scraping completed! Downloaded {total_downloaded} total images from {len(all_page_urls)} pages.")
             print(f"[INFO] Check {DOWNLOAD_DIR}/{album_name}/ for all downloaded images.")
             
         except Exception as e:
-            print(f"⚠ Fatal error during scraping: {e}")
+            print(f"Fatal error during scraping: {e}")
         finally:
             await browser.close()
-
 
 if __name__ == "__main__":
     album = input("Paste Flickr album URL: ")

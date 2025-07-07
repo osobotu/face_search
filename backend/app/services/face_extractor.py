@@ -1,18 +1,17 @@
 import os
+import json
 import cv2
+import asyncio
 import numpy as np
 from typing import List, Dict
 from insightface.app import FaceAnalysis
+from ahnlich.store_album import store_album_embeddings
 
 # Initialize face analysis model
 face_app = FaceAnalysis(name="buffalo_l", providers=['CPUExecutionProvider'])
 face_app.prepare(ctx_id=0)
 
 def extract_faces_from_image(image_path: str, album_path: str) -> List[Dict]:
-    import os
-    import cv2
-    import numpy as np
-    from insightface.app import FaceAnalysis
 
     face_app = FaceAnalysis(name="buffalo_l", providers=['CPUExecutionProvider'])
     face_app.prepare(ctx_id=0)
@@ -24,7 +23,7 @@ def extract_faces_from_image(image_path: str, album_path: str) -> List[Dict]:
     faces = face_app.get(image)
     image_id = os.path.splitext(os.path.basename(image_path))[0]
 
-    # Updated paths: folders inside the album folder
+    # create folders for faces and embeddings in album folder
     face_dir = os.path.join(album_path, "faces")
     embed_dir = os.path.join(album_path, "embeddings")
     os.makedirs(face_dir, exist_ok=True)
@@ -36,7 +35,7 @@ def extract_faces_from_image(image_path: str, album_path: str) -> List[Dict]:
         bbox = face.bbox.astype(int)
         x1, y1, x2, y2 = bbox
         embedding = face.embedding
-        print(f"Embedding shape: {embedding.shape}")
+        # embedding has a shape of (512,)
 
         face_crop = image[y1:y2, x1:x2]
         face_filename = f"{image_id}_face_{idx}.jpg"
@@ -71,15 +70,33 @@ def extract_faces_from_folder(album_path: str) -> List[Dict]:
         try:
             faces = extract_faces_from_image(image_path, album_path)
             all_faces_metadata.extend(faces)
-            print(f"✅ Processed {image_path} | {len(faces)} faces found")
+            print(f"Processed {image_path} | {len(faces)} faces found")
         except Exception as e:
-            print(f"⚠️ Skipped {image_path}: {e}")
+            print(f"Skipped {image_path}: {e}")
+    
+    # save metadata.json file
+    METADATA_FILE = "metadata.json"
+    metadata_path = os.path.join(album_path, METADATA_FILE)
+    os.makedirs(album_path, exist_ok=True)
+    with open(metadata_path, "w") as f:
+        json.dump(all_faces_metadata, f, indent=4)
 
     return all_faces_metadata
 
 if __name__ == "__main__":
-    album_path = "data/flickr_downloads/mastercard_grad_2025"
-    metadata = extract_faces_from_folder(album_path)
-    print(f"\n🔍 Done! Total faces extracted: {len(metadata)}")
+    import asyncio
 
+    # album_path = "../../../data/flickr_downloads/small"
+    album_path = "C:/Users/STUDENT/dev/face-search/data/flickr_downloads/small"
+
+    album_id = os.path.basename(album_path)
+    metadata = extract_faces_from_folder(album_path)
+    print(metadata)
+    metadata_path = os.path.join(album_path, "metadata.json")
+
+    async def main():
+        await store_album_embeddings(album_id=album_id, metadata_path=metadata_path)
+
+    asyncio.run(main())
+    print(f"\nDone! Total faces extracted and stored: {len(metadata)}")
 

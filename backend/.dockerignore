@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.npy
+*.jpg
+*.jpeg
+*.png
+*.zip
+venv/
+be_venv/
+.env
+data/
